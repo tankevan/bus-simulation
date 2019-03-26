@@ -1,0 +1,24 @@
+{
+  "name": "esa-game",
+  "version": "1.0.0",
+  "description": "Repository for the game created for the Engineering System Architecture (ESA) module in Term 5.",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tankevan/conservation-game.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tankevan/conservation-game/issues"
+  },
+  "homepage": "https://github.com/tankevan/conservation-game#readme",
+  "dependencies": {
+    "heroku": "^0.2.0",
+    "http-server": "^0.11.1"
+  }
+}
