@@ -89,8 +89,9 @@ gameScene.addBus = function() {
   bus.setScale(0.5);
   bus.depth = 2;
 
-  bus.targetStop = 0;
+  bus.capacity = 10;
   bus.state = 'idle';
+  bus.targetStop = 0;
   bus.passengers = this.add.group();
 
   this.busGroup.add(bus);
@@ -118,23 +119,30 @@ gameScene.drawEdge = function(node1, node2) {
 gameScene.passengerArrive = function() {
   this.busStopGroup.children.each((busStop) => {
     const randNum = Math.random();
-    if (randNum > 0.9) {
+    if (randNum > 0.8) {
       gameScene.addPassenger(busStop);
     }
   })
 }
 
 gameScene.addPassenger = function(originStop) {
-  spriteX = originStop.x + 20 + (originStop.passengers.children.size * 10);
-  spriteY = originStop.y - 15
-  let passenger = this.add.sprite(spriteX, spriteY, 'passenger')
+  let passenger = this.add.sprite(-100, -100, 'passenger') // render out of screen first
   passenger.setScale(0.2);
 
+  passenger.origin = originStop;
+  passenger.destination = '';
+
+
   originStop.passengers.add(passenger);
+  gameScene.drawPassengers(originStop);
 }
 
+// k. also used in update
 gameScene.drawPassengers = function(busStop) {
-
+  busStop.passengers.children.each((passenger, index) => {
+    passenger.x = passenger.origin.x + 20 + (index * 10);
+    passenger.y = passenger.origin.y - 15;
+  });
 }
 // ***************************
 // *** GAME UPDATE SECTION ***
@@ -144,42 +152,67 @@ gameScene.drawPassengers = function(busStop) {
 gameScene.update = function() {
 
   // bus travelling logic
-  this.busGroup.children.each((bus) => {
-    console.log(bus.state);
-    if (bus.state === 'idle') {
-      bus.targetStop = 1;
-      bus.state = 'travelling';
-    } else if (bus.state == 'travelling') {
-      const targetStopObj = this.busStopGroup.children.entries[bus.targetStop];
-      if (bus.x === targetStopObj.x && bus.y === targetStopObj.y) {
-        bus.state = 'arrived';
-      } else {
-        // move bus one step towards target 
-        const xDiff = targetStopObj.x - bus.x;
-        const yDiff = targetStopObj.y - bus.y;
-        const xDirection = xDiff / Math.abs(xDiff);
-        const yDirection = yDiff / Math.abs(yDiff);
-
-        if (bus.x !== targetStopObj.x) {
-          bus.x += xDirection * 1;
-        }
-
-        if (bus.y !== targetStopObj.y) {
-          bus.y += yDirection * 1;
-        }
-      }
-
-    } else if (bus.state === 'arrived') {
-      bus.targetStop = (bus.targetStop + 1) % 4;
-      bus.state = 'travelling';
-    }
-  });
+  gameScene.updateBuses();
 
 };
 
 // *** UPDATE SUB-FUNCTIONS *** 
 
+gameScene.updateBuses = function() {
+  this.busGroup.children.each((bus) => {
+    const targetStopObj = this.busStopGroup.children.entries[bus.targetStop];
+    if (bus.state === 'idle') {
+      bus.targetStop = 1;
+      bus.state = 'travelling';
+    } else if (bus.state == 'travelling') {
+      if (bus.x === targetStopObj.x && bus.y === targetStopObj.y) {
+        bus.state = 'arrived';
+      } else {
+        gameScene.moveBus(bus, targetStopObj);
+      }
 
+    } else if (bus.state === 'arrived') {
+      if (targetStopObj.passengers && targetStopObj.passengers.children.size > 0) {
+        gameScene.movePassengers(bus, targetStopObj);
+      }
+
+      bus.targetStop = (bus.targetStop + 1) % 4;
+      bus.state = 'travelling';
+    }
+  });
+}
+
+gameScene.moveBus = function(bus, targetStopObj) {
+  // move bus one step towards target 
+  const xDiff = targetStopObj.x - bus.x;
+  const yDiff = targetStopObj.y - bus.y;
+  const xDirection = xDiff / Math.abs(xDiff);
+  const yDirection = yDiff / Math.abs(yDiff);
+
+  if (bus.x !== targetStopObj.x) {
+    bus.x += xDirection * 1;
+  }
+
+  if (bus.y !== targetStopObj.y) {
+    bus.y += yDirection * 1;
+  }
+}
+
+gameScene.movePassengers = function(bus, targetStopObj) {
+  let remainingCapacity = bus.capacity - bus.passengers.children.size;
+  
+  while (remainingCapacity > 0 && targetStopObj.passengers.children.size > 0) {
+    const firstPassenger = targetStopObj.passengers.getFirstAlive();
+    console.log(firstPassenger);
+    targetStopObj.passengers.remove(firstPassenger, true, false);
+    bus.passengers.add(firstPassenger);
+    console.log(targetStopObj.passengers.children.size, bus.passengers.children.size);
+
+    remainingCapacity -= 1;
+  }
+
+  gameScene.drawPassengers(targetStopObj);
+}
 
 // *************************
 // *** GAME OVER SECTION ***
