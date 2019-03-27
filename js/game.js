@@ -54,24 +54,26 @@ gameScene.create = function() {
 
   for (const key in this.busStopList) {
     const stop = this.busStopList[key];
-    console.log(key,stop);
     gameScene.addBusStop(stop.x, stop.y, key);
   }
 
   // draw bus
   this.busGroup = this.add.group();
-  gameScene.addBus();
 
-  // draw edges
+  // iterate through this.busRoutes
   for (const key in this.busRoutes) {
     const routeArr = this.busRoutes[key];
+
+    // draw edges
     for (let i = 0; i < routeArr.length - 1; i++) {
       gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
     }
+
+    // draw bus
+    gameScene.addBus(key, routeArr[0], routeArr.slice(-1)[0]);
   }
 
   // create event to add people to bus stops
-  this.passengerGroup = this.add
 
   this.passengerEvent = this.time.addEvent({
     delay: 1000,
@@ -98,16 +100,20 @@ gameScene.addBusStop = function(lat, lng, stopNumber) {
   this.busStops[stopNumber] = busStop;
 }
 
-gameScene.addBus = function() {
-  let bus = this.add.sprite(160, 160, 'bus');
+gameScene.addBus = function(busNo, origin, dest) {
+  let bus = this.add.sprite(this.busStopList[origin].x, this.busStopList[origin].y, 'bus');
   bus.setScale(0.5);
   bus.depth = 2;
 
+  bus.number = busNo;
+  bus.origin = origin;
+  bus.destination = dest;
   bus.capacity = 10;
   bus.state = 'idle';
   bus.targetStop = 0;
   bus.passengers = this.add.group();
 
+  console.log(bus);
   this.busGroup.add(bus);
 }
 
