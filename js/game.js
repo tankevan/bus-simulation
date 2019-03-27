@@ -11,7 +11,13 @@ let gameScene = new Phaser.Scene('Game');
 // some parameters for our scene
 gameScene.init = function() {
   this.playerSpeed = 2.5;
-  this.busRoute = ['40001', '40002', '40003', '40004'];
+  // this.busRoute = ['40001', '40002', '40003', '40004'];
+  this.busStopList = {
+    "40001": { "x": 160, "y": 160 },
+    "40002": { "x": 320, "y": 80 },
+    "40003": { "x": 480, "y": 160 },
+    "40004": { "x": 320, "y": 240 },
+  };
   this.busRoutes = {
     "157": ["40001", "40002", "40003", "40004"]
   };
@@ -46,21 +52,17 @@ gameScene.create = function() {
   // draw nodes
   this.busStopGroup = this.add.group();
 
-  gameScene.addBusStop(160, 160, '40001');
-  gameScene.addBusStop(320, 80, '40002');
-  gameScene.addBusStop(480, 160, '40003');
-  gameScene.addBusStop(320, 240, '40004');
+  for (const key in this.busStopList) {
+    const stop = this.busStopList[key];
+    console.log(key,stop);
+    gameScene.addBusStop(stop.x, stop.y, key);
+  }
 
   // draw bus
   this.busGroup = this.add.group();
   gameScene.addBus();
 
   // draw edges
-  // gameScene.drawEdge(this.busStopGroup.children.entries[0], this.busStopGroup.children.entries[1]);
-  // gameScene.drawEdge(this.busStopGroup.children.entries[1], this.busStopGroup.children.entries[2]);
-  // gameScene.drawEdge(this.busStopGroup.children.entries[2], this.busStopGroup.children.entries[3]);
-  // gameScene.drawEdge(this.busStopGroup.children.entries[3], this.busStopGroup.children.entries[0]);
-
   for (const key in this.busRoutes) {
     const routeArr = this.busRoutes[key];
     for (let i = 0; i < routeArr.length - 1; i++) {
@@ -215,10 +217,9 @@ gameScene.movePassengers = function(bus, targetStopObj) {
   
   while (remainingCapacity > 0 && targetStopObj.passengers.children.size > 0) {
     const firstPassenger = targetStopObj.passengers.getFirstAlive();
-    console.log(firstPassenger);
+
     targetStopObj.passengers.remove(firstPassenger, true, false);
     bus.passengers.add(firstPassenger);
-    console.log(targetStopObj.passengers.children.size, bus.passengers.children.size);
 
     remainingCapacity -= 1;
   }
