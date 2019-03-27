@@ -12,6 +12,10 @@ let gameScene = new Phaser.Scene('Game');
 gameScene.init = function() {
   this.playerSpeed = 2.5;
   this.busRoute = ['40001', '40002', '40003', '40004'];
+  this.busRoutes = {
+    "157": ["40001", "40002", "40003", "40004"]
+  };
+  this.busStops = {};
 
 }
 
@@ -52,10 +56,17 @@ gameScene.create = function() {
   gameScene.addBus();
 
   // draw edges
-  gameScene.drawEdge(this.busStopGroup.children.entries[0], this.busStopGroup.children.entries[1]);
-  gameScene.drawEdge(this.busStopGroup.children.entries[1], this.busStopGroup.children.entries[2]);
-  gameScene.drawEdge(this.busStopGroup.children.entries[2], this.busStopGroup.children.entries[3]);
-  gameScene.drawEdge(this.busStopGroup.children.entries[3], this.busStopGroup.children.entries[0]);
+  // gameScene.drawEdge(this.busStopGroup.children.entries[0], this.busStopGroup.children.entries[1]);
+  // gameScene.drawEdge(this.busStopGroup.children.entries[1], this.busStopGroup.children.entries[2]);
+  // gameScene.drawEdge(this.busStopGroup.children.entries[2], this.busStopGroup.children.entries[3]);
+  // gameScene.drawEdge(this.busStopGroup.children.entries[3], this.busStopGroup.children.entries[0]);
+
+  for (const key in this.busRoutes) {
+    const routeArr = this.busRoutes[key];
+    for (let i = 0; i < routeArr.length - 1; i++) {
+      gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
+    }
+  }
 
   // create event to add people to bus stops
   this.passengerGroup = this.add
@@ -82,6 +93,7 @@ gameScene.addBusStop = function(lat, lng, stopNumber) {
   busStop.passengers = this.add.group();
 
   this.busStopGroup.add(busStop);
+  this.busStops[stopNumber] = busStop;
 }
 
 gameScene.addBus = function() {
