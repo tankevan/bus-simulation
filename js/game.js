@@ -117,6 +117,10 @@ gameScene.addBus = function(busNo, origin, dest) {
   this.busGroup.add(bus);
 }
 
+gameScene.destroyBus = function(bus) {
+  this.busGroup.remove(bus, true, true);
+}
+
 gameScene.drawEdge = function(node1, node2) {
   const diffX = node2.x - node1.x;
   const xDirection = diffX / Math.abs(diffX);
@@ -192,12 +196,17 @@ gameScene.updateBuses = function() {
       }
 
     } else if (bus.state === 'arrived') {
-      if (targetStopObj.passengers && targetStopObj.passengers.children.size > 0) {
-        gameScene.movePassengers(bus, targetStopObj);
-      }
+      const targetStopNo = this.busRoutes[bus.number][bus.targetStop];
+      if (targetStopNo === bus.destination) {
+        gameScene.destroyBus(bus);
+      } else {
+          if (targetStopObj.passengers && targetStopObj.passengers.children.size > 0) {
+            gameScene.movePassengers(bus, targetStopObj);
+          }
 
-      bus.targetStop = (bus.targetStop + 1) % 4;
-      bus.state = 'travelling';
+          bus.targetStop = (bus.targetStop + 1) % 4;
+          bus.state = 'travelling';
+      }
     }
   });
 }
