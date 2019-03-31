@@ -13,19 +13,23 @@ gameScene.init = function() {
   this.playerSpeed = 2.5;
   // this.busRoute = ['40001', '40002', '40003', '40004'];
   this.busStopList = {
-    "40001": { "x": 160, "y": 160, "busServices": [] },
-    "40002": { "x": 320, "y": 80, "busServices": [] },
-    "40003": { "x": 480, "y": 160, "busServices": [] },
-    "40004": { "x": 320, "y": 240, "busServices": [] },
+    "1": { "x": 40, "y": 140, "busServices": [] },
+    "2": { "x": 80, "y": 80, "busServices": [] },
+    "3": { "x": 160, "y": 130, "busServices": [] },
+    "4": { "x": 240, "y": 130, "busServices": [] },
+    "5": { "x": 320, "y": 160, "busServices": [] },
+    "6": { "x": 440, "y": 160, "busServices": [] },
+    "7": { "x": 520, "y": 160, "busServices": [] },
+    "8": { "x": 600, "y": 160, "busServices": [] },
+    "9": { "x": 560, "y": 240, "busServices": [] },
+    "10": { "x": 480, "y": 240, "busServices": [] }
   };
   this.busRoutes = {
-    "157": ["40001", "40002", "40003", "40004"],
-    "157b": ["40004", "40003", "40002", "40001"]
+    "358": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "6","5", "4", "3", "2", "1"],
   };
   this.busStops = {}; // stores bus stop objects
   this.averageCapacities = {
-    "157": { "value": 0, "numRecords": 0 },
-    "157b": { "value": 0, "numRecords": 0}
+    "358": { "value": 0, "numRecords": 0 }
   };
 }
 
@@ -145,11 +149,12 @@ gameScene.addBus = function(busNo, origin, dest) {
   bus.number = busNo;
   bus.origin = origin;
   bus.destination = dest;
-  bus.capacity = 10;
+  bus.capacity = 90;
   bus.state = 'arrived';
-  bus.targetStop = 0;
   bus.passengers = this.add.group();
   bus.tag = this.add.text(bus.x - 20, bus.y + 50, bus.number, { fontSize: '16px', fill: '#000'});
+  bus.remainingStops = this.busRoutes[bus.number].slice();
+  bus.targetStop = 0;
 
   this.busGroup.add(bus);
 }
@@ -181,12 +186,15 @@ gameScene.drawEdge = function(node1, node2) {
 gameScene.passengerArrive = function() {
   this.busStopGroup.children.each((busStop) => {
     const randNum = Math.random();
-    if (randNum > 0.8) {
+    // k. how to use?
+    const invFunc = (-1) / (1.43 * Math.log(1 - randNum));
+    if (randNum > 0.1) {
       // randomly choose a service
       const servicesList = busStop["busServices"];
       const busIndex = servicesList.length > 0 ? Math.floor(Math.random() * (servicesList.length)) : 0;
       const busNo = servicesList[busIndex];
       
+      // randomly choose a stop on a remaining stop
       let routeArr = this.busRoutes[busNo];
       let destinationStop = null;
       for (let i = 0; i < routeArr.length; i++) {
@@ -195,8 +203,6 @@ gameScene.passengerArrive = function() {
           destinationStop = routeArr[destinationIndex];
         }
       }
-
-      // randomly choose a stop on a remaining stop
 
       gameScene.addPassenger(busStop, destinationStop, busNo);
     }
@@ -238,7 +244,7 @@ gameScene.update = function() {
 
 gameScene.updateBuses = function() {
   this.busGroup.children.each((bus) => {
-    const targetStopNo = this.busRoutes[bus.number][bus.targetStop];
+    const targetStopNo = bus.targetStop;
     const targetStopObj = this.busStops[targetStopNo];
 
     if (bus.state === 'idle') {
@@ -247,23 +253,24 @@ gameScene.updateBuses = function() {
     } else if (bus.state == 'travelling') {
       const xDiff = Math.abs(bus.x - targetStopObj.x);
       const yDiff = Math.abs(bus.y - targetStopObj.y);
-      if (xDiff < 0.2 && yDiff < 0.2) {
+      if (xDiff < 1 && yDiff < 1) {
         bus.state = 'arrived';
       } else {
         gameScene.moveBus(bus, targetStopObj);
       }
 
     } else if (bus.state === 'arrived') {
-      const targetStopNo = this.busRoutes[bus.number][bus.targetStop];
-
-      if (targetStopNo === bus.destination) {
+      if (targetStopNo === bus.destination && bus.remainingStops.length === 0) {
         gameScene.destroyBus(bus);
       } else {
-          if (targetStopObj.passengers && targetStopObj.passengers.children.size > 0) {
+          if (targetStopObj && targetStopObj.passengers && targetStopObj.passengers.children.size > 0) {
             gameScene.movePassengers(bus, targetStopObj);
           }
 
-          bus.targetStop = (bus.targetStop + 1) % 4;
+          
+          bus.targetStop = bus.remainingStops.shift();
+          // console.log(bus.remainingStops, bus.targetStop, this.busRoutes[bus.number]);
+          // bus.targetStop = (bus.targetStop + 1) % 4;
           bus.state = 'travelling';
       }
     }
@@ -278,9 +285,11 @@ gameScene.moveBus = function(bus, targetStopObj) {
   const yDirection = yDiff / Math.abs(yDiff);
 
   const movementSpeed = 1;
+  const variance = 0.2;
+  const adjSpeed = movementSpeed + ((Math.random() - 0.5) * 2) * variance;
   const angle = Math.atan(Math.abs(yDiff) / Math.abs(xDiff));
-  const xStep = movementSpeed * Math.cos(angle);
-  const yStep = movementSpeed * Math.sin(angle);
+  const xStep = adjSpeed * Math.cos(angle);
+  const yStep = adjSpeed * Math.sin(angle);
 
   if (bus.x !== targetStopObj.x) {
     bus.x += Math.min(xDirection * xStep);
@@ -297,6 +306,14 @@ gameScene.moveBus = function(bus, targetStopObj) {
 
 gameScene.movePassengers = function(bus, targetStopObj) {
   let remainingCapacity = bus.capacity - bus.passengers.children.size;
+
+  // k. unload passengers if at target stop
+  bus.passengers.children.each((passenger) => {
+    if (passenger.destination === targetStopObj.stopNumber){
+      bus.passengers.remove(passenger, true, false);
+      remainingCapacity += 1
+    }
+  });
 
   targetStopObj.passengers.children.each((passenger) => {
     if (remainingCapacity > 0 && passenger.busNo === bus.number) {
@@ -319,7 +336,7 @@ gameScene.updateCapacities = function(bus) {
 
   this.averageCapacities[bus.number]["value"] = newAverage;
   this.averageCapacities[bus.number]["numRecords"] = numRecords + 1;
-  console.log(bus.number);
+
   const t1 = document.getElementById(bus.number);
   t1.innerHTML = newAverage.toFixed(2);
 
