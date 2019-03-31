@@ -71,7 +71,7 @@ gameScene.create = function() {
     }
 
     // populate list of bus services for each stop
-    for (let i = 0; i < routeArr.length; i++) {
+    for (let i = 0; i < routeArr.length - 1; i++) {
       this.busStopList[routeArr[i]].busServices.push(key);
     }
   }
