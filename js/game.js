@@ -13,10 +13,10 @@ gameScene.init = function() {
   this.playerSpeed = 2.5;
   // this.busRoute = ['40001', '40002', '40003', '40004'];
   this.busStopList = {
-    "40001": { "x": 160, "y": 160 },
-    "40002": { "x": 320, "y": 80 },
-    "40003": { "x": 480, "y": 160 },
-    "40004": { "x": 320, "y": 240 },
+    "40001": { "x": 160, "y": 160, "busServices": [] },
+    "40002": { "x": 320, "y": 80, "busServices": [] },
+    "40003": { "x": 480, "y": 160, "busServices": [] },
+    "40004": { "x": 320, "y": 240, "busServices": [] },
   };
   this.busRoutes = {
     "157": ["40001", "40002", "40003", "40004"]
@@ -54,7 +54,7 @@ gameScene.create = function() {
 
   for (const key in this.busStopList) {
     const stop = this.busStopList[key];
-    gameScene.addBusStop(stop.x, stop.y, key);
+    gameScene.addBusStop(stop.x, stop.y, stop.busServices, key);
   }
 
   // draw bus
@@ -67,6 +67,11 @@ gameScene.create = function() {
     // draw edges
     for (let i = 0; i < routeArr.length - 1; i++) {
       gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
+    }
+
+    // populate list of bus services for each stop
+    for (let i = 0; i < routeArr.length; i++) {
+      this.busStopList[routeArr[i]].busServices.push(key);
     }
   }
 
@@ -94,12 +99,13 @@ gameScene.create = function() {
 
 // *** CREATE SUB-FUNCTIONS *** 
 
-gameScene.addBusStop = function(lat, lng, stopNumber) {
+gameScene.addBusStop = function(lat, lng, busServices, stopNumber) {
   let busStop = this.add.sprite(lat, lng, 'busStop');
   busStop.setScale(0.25);
   busStop.depth = 1;
 
   busStop.stopNumber = stopNumber;
+  busStop.busServices = busServices;
   busStop.passengers = this.add.group();
 
   this.busStopGroup.add(busStop);
@@ -127,7 +133,6 @@ gameScene.addBus = function(busNo, origin, dest) {
   bus.targetStop = 0;
   bus.passengers = this.add.group();
 
-  console.log(bus);
   this.busGroup.add(bus);
 }
 
@@ -158,19 +163,37 @@ gameScene.passengerArrive = function() {
   this.busStopGroup.children.each((busStop) => {
     const randNum = Math.random();
     if (randNum > 0.8) {
-      gameScene.addPassenger(busStop);
+      // randomly choose a service
+      const servicesList = busStop["busServices"];
+      const busIndex = servicesList.length > 0 ? Math.floor(Math.random() * (servicesList.length)) : 0;
+      const busNo = servicesList[busIndex];
+      
+      let routeArr = this.busRoutes[busNo];
+      let destinationStop = null;
+      for (let i = 0; i < routeArr.length; i++) {
+        if (routeArr[i] === busStop.stopNumber) {
+          const destinationIndex = i + Math.floor(Math.random() * (routeArr.length - i - 1));
+          destinationStop = routeArr[destinationIndex];
+          console.log(destinationIndex, destinationStop);
+        }
+      }
+
+      // randomly choose a stop on a remaining stop
+
+      gameScene.addPassenger(busStop, destinationStop, busNo);
     }
   })
 }
 
-gameScene.addPassenger = function(originStop) {
+gameScene.addPassenger = function(originStop, destinationStop, busNo) {
   let passenger = this.add.sprite(-100, -100, 'passenger') // render out of screen first
   passenger.setScale(0.2);
 
   passenger.origin = originStop;
-  passenger.destination = '';
+  passenger.destination = destinationStop;
+  passenger.busNo = busNo;
 
-
+  console.log(passenger);
   originStop.passengers.add(passenger);
   gameScene.drawPassengers(originStop);
 }
