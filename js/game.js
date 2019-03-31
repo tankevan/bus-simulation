@@ -19,9 +19,10 @@ gameScene.init = function() {
     "40004": { "x": 320, "y": 240, "busServices": [] },
   };
   this.busRoutes = {
-    "157": ["40001", "40002", "40003", "40004"]
+    "157": ["40001", "40002", "40003", "40004"],
+    "157b": ["40004", "40003", "40002", "40001"]
   };
-  this.busStops = {};
+  this.busStops = {}; // stores bus stop objects
 
 }
 
@@ -64,9 +65,11 @@ gameScene.create = function() {
   for (const key in this.busRoutes) {
     const routeArr = this.busRoutes[key];
 
-    // draw edges
-    for (let i = 0; i < routeArr.length - 1; i++) {
-      gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
+    // draw edges only if not the backward route
+    if (key.substr(-1) !== 'b') {
+      for (let i = 0; i < routeArr.length - 1; i++) {
+        gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
+      }
     }
 
     // populate list of bus services for each stop
@@ -219,7 +222,9 @@ gameScene.update = function() {
 
 gameScene.updateBuses = function() {
   this.busGroup.children.each((bus) => {
-    const targetStopObj = this.busStopGroup.children.entries[bus.targetStop];
+    const targetStopNo = this.busRoutes[bus.number][bus.targetStop];
+    const targetStopObj = this.busStops[targetStopNo];
+
     if (bus.state === 'idle') {
       bus.targetStop = 1;
       bus.state = 'travelling';
@@ -232,6 +237,7 @@ gameScene.updateBuses = function() {
 
     } else if (bus.state === 'arrived') {
       const targetStopNo = this.busRoutes[bus.number][bus.targetStop];
+      console.log(bus.number, bus.targetStop);
       if (targetStopNo === bus.destination) {
         gameScene.destroyBus(bus);
       } else {
