@@ -66,10 +66,8 @@ gameScene.create = function() {
     const routeArr = this.busRoutes[key];
 
     // draw edges only if not the backward route
-    if (key.substr(-1) !== 'b') {
-      for (let i = 0; i < routeArr.length - 1; i++) {
-        gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
-      }
+    for (let i = 0; i < routeArr.length - 1; i++) {
+      gameScene.drawEdge(this.busStops[routeArr[i]], this.busStops[routeArr[i+1]]);
     }
 
     // populate list of bus services for each stop
@@ -135,31 +133,33 @@ gameScene.addBus = function(busNo, origin, dest) {
   bus.state = 'arrived';
   bus.targetStop = 0;
   bus.passengers = this.add.group();
+  bus.tag = this.add.text(bus.x - 20, bus.y + 50, bus.number, { fontSize: '16px', fill: '#000'});
 
   this.busGroup.add(bus);
 }
 
 gameScene.destroyBus = function(bus) {
+  bus.tag.destroy();
   this.busGroup.remove(bus, true, true);
 }
 
 gameScene.drawEdge = function(node1, node2) {
-  const diffX = node2.x - node1.x;
-  const xDirection = diffX / Math.abs(diffX);
-  const diffY = node2.y - node1.y;
-  const yDirection = diffY / Math.abs(diffY);
-  const minDiff = Math.min(Math.abs(diffX), Math.abs(diffY));
-  const firstX = node1.x + xDirection * minDiff;
-  const firstY = node1.y + yDirection * minDiff;
+  // const diffX = node2.x - node1.x;
+  // const xDirection = diffX / Math.abs(diffX);
+  // const diffY = node2.y - node1.y;
+  // const yDirection = diffY / Math.abs(diffY);
+  // const minDiff = Math.min(Math.abs(diffX), Math.abs(diffY));
+  // const firstX = node1.x + xDirection * minDiff;
+  // const firstY = node1.y + yDirection * minDiff;
   
-  const line = new Phaser.Geom.Line(node1.x, node1.y, firstX, firstY);
+  const line = new Phaser.Geom.Line(node1.x, node1.y, node2.x, node2.y);
   const graphics = this.add.graphics({ lineStyle: { width: 4, color: 0xaa00aa }});
   graphics.strokeLineShape(line);
 
-  if (diffX !== diffY) {
-    const secondLine = new Phaser.Geom.Line(firstX, firstY, node2.x, node2.y);
-    graphics.strokeLineShape(secondLine);
-  }
+  // if (diffX !== diffY) {
+  //   const secondLine = new Phaser.Geom.Line(firstX, firstY, node2.x, node2.y);
+  //   graphics.strokeLineShape(secondLine);
+  // }
 }
 
 gameScene.passengerArrive = function() {
@@ -229,7 +229,9 @@ gameScene.updateBuses = function() {
       bus.targetStop = 1;
       bus.state = 'travelling';
     } else if (bus.state == 'travelling') {
-      if (bus.x === targetStopObj.x && bus.y === targetStopObj.y) {
+      const xDiff = Math.abs(bus.x - targetStopObj.x);
+      const yDiff = Math.abs(bus.y - targetStopObj.y);
+      if (xDiff < 0.2 && yDiff < 0.2) {
         bus.state = 'arrived';
       } else {
         gameScene.moveBus(bus, targetStopObj);
@@ -259,13 +261,22 @@ gameScene.moveBus = function(bus, targetStopObj) {
   const xDirection = xDiff / Math.abs(xDiff);
   const yDirection = yDiff / Math.abs(yDiff);
 
+  const movementSpeed = 1;
+  const angle = Math.atan(Math.abs(yDiff) / Math.abs(xDiff));
+  const xStep = movementSpeed * Math.cos(angle);
+  const yStep = movementSpeed * Math.sin(angle);
+
   if (bus.x !== targetStopObj.x) {
-    bus.x += xDirection * 1;
+    bus.x += Math.min(xDirection * xStep);
   }
 
   if (bus.y !== targetStopObj.y) {
-    bus.y += yDirection * 1;
+    bus.y += Math.min(yDirection * yStep);
   }
+
+  // move the tag as well
+  bus.tag.x = bus.x - 19;
+  bus.tag.y = bus.y + 20;
 }
 
 gameScene.movePassengers = function(bus, targetStopObj) {
