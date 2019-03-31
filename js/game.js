@@ -23,7 +23,10 @@ gameScene.init = function() {
     "157b": ["40004", "40003", "40002", "40001"]
   };
   this.busStops = {}; // stores bus stop objects
-
+  this.averageCapacities = {
+    "157": { "value": 0, "numRecords": 0 },
+    "157b": { "value": 0, "numRecords": 0}
+  };
 }
 
 // load asset files for our game
@@ -74,6 +77,19 @@ gameScene.create = function() {
     for (let i = 0; i < routeArr.length - 1; i++) {
       this.busStopList[routeArr[i]].busServices.push(key);
     }
+
+    // create text in the capacity container
+    const t1 = document.getElementById("capacityContainer");
+    const d1 = document.createElement("div");
+    const p = document.createElement("p");
+    const p2 = document.createElement("p");
+    p.class = "label";
+    p.innerHTML = key;
+    p2.id = key;
+    p2.innerHTML = "0";
+    d1.appendChild(p);
+    d1.appendChild(p2);
+    t1.appendChild(d1);
   }
 
   // event that spawns passengers
@@ -239,7 +255,7 @@ gameScene.updateBuses = function() {
 
     } else if (bus.state === 'arrived') {
       const targetStopNo = this.busRoutes[bus.number][bus.targetStop];
-      console.log(bus.number, bus.targetStop);
+
       if (targetStopNo === bus.destination) {
         gameScene.destroyBus(bus);
       } else {
@@ -290,8 +306,23 @@ gameScene.movePassengers = function(bus, targetStopObj) {
       remainingCapacity -= 1;
     }
   });  
-  console.log(remainingCapacity);
+
   gameScene.drawPassengers(targetStopObj);
+  gameScene.updateCapacities(bus);
+}
+
+gameScene.updateCapacities = function(bus) {
+  const value = this.averageCapacities[bus.number]["value"];
+  const numRecords = this.averageCapacities[bus.number]["numRecords"];
+  const currCapacity = (bus.passengers.children.size) / bus.capacity;
+  const newAverage = ((value * numRecords) + currCapacity) / (numRecords + 1);
+
+  this.averageCapacities[bus.number]["value"] = newAverage;
+  this.averageCapacities[bus.number]["numRecords"] = numRecords + 1;
+  console.log(bus.number);
+  const t1 = document.getElementById(bus.number);
+  t1.innerHTML = newAverage.toFixed(2);
+
 }
 
 // *************************
