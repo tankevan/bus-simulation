@@ -87,7 +87,7 @@ gameScene.create = function() {
   // event that spawns buses
 
   this.busEvent = this.time.addEvent({
-    delay: 2000,
+    delay: 5000,
     callback: gameScene.generateBuses,
     callbackScope:this,
     loop:true
@@ -174,7 +174,6 @@ gameScene.passengerArrive = function() {
         if (routeArr[i] === busStop.stopNumber) {
           const destinationIndex = i + Math.floor(Math.random() * (routeArr.length - i - 1));
           destinationStop = routeArr[destinationIndex];
-          console.log(destinationIndex, destinationStop);
         }
       }
 
@@ -193,7 +192,6 @@ gameScene.addPassenger = function(originStop, destinationStop, busNo) {
   passenger.destination = destinationStop;
   passenger.busNo = busNo;
 
-  console.log(passenger);
   originStop.passengers.add(passenger);
   gameScene.drawPassengers(originStop);
 }
@@ -266,16 +264,16 @@ gameScene.moveBus = function(bus, targetStopObj) {
 
 gameScene.movePassengers = function(bus, targetStopObj) {
   let remainingCapacity = bus.capacity - bus.passengers.children.size;
-  
-  while (remainingCapacity > 0 && targetStopObj.passengers.children.size > 0) {
-    const firstPassenger = targetStopObj.passengers.getFirstAlive();
 
-    targetStopObj.passengers.remove(firstPassenger, true, false);
-    bus.passengers.add(firstPassenger);
+  targetStopObj.passengers.children.each((passenger) => {
+    if (remainingCapacity > 0 && passenger.busNo === bus.number) {
+      targetStopObj.passengers.remove(passenger, true, false);
+      bus.passengers.add(passenger);
 
-    remainingCapacity -= 1;
-  }
-
+      remainingCapacity -= 1;
+    }
+  });  
+  console.log(remainingCapacity);
   gameScene.drawPassengers(targetStopObj);
 }
 
