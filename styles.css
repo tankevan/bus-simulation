@@ -10,5 +10,12 @@ body {
 }
 
 #capacityContainer {
-	display: block;
+	position: absolute;
+	height: 100vh;
+	width: 30vw;
+	right: 0;
+	display: flex;
+	flex-direction: column;
+	/*align-items: center;*/
+  	justify-content: center;
 }

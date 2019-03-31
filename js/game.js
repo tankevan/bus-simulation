@@ -83,17 +83,19 @@ gameScene.create = function() {
     }
 
     // create text in the capacity container
-    const t1 = document.getElementById("capacityContainer");
-    const d1 = document.createElement("div");
-    const p = document.createElement("p");
-    const p2 = document.createElement("p");
-    p.class = "label";
-    p.innerHTML = key;
-    p2.id = key;
-    p2.innerHTML = "0";
-    d1.appendChild(p);
-    d1.appendChild(p2);
-    t1.appendChild(d1);
+    const ctr = document.getElementById("capacityTable");
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    const td2 = document.createElement("td");
+    // const p = document.createElement("p");
+    // const p2 = document.createElement("p");
+    td.class = "label";
+    td.innerHTML = key + ":";
+    td2.id = key;
+    td2.innerHTML = "0";
+    tr.appendChild(td);
+    tr.appendChild(td2);
+    ctr.appendChild(tr);
   }
 
   // event that spawns passengers
