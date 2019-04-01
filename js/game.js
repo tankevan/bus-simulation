@@ -37,9 +37,9 @@ gameScene.init = function() {
 gameScene.preload = function() {
 
   // load images
-  this.load.image('busStop', 'assets/recycling.png');
-  this.load.image('bus', 'assets/player.png');
-  this.load.image('passenger', 'assets/dragon.png');
+  this.load.image('busStop', 'assets/bus-stop.png');
+  this.load.image('bus', 'assets/bus.png');
+  this.load.image('passenger', 'assets/man-user.png');
 };
 
 
@@ -124,7 +124,7 @@ gameScene.create = function() {
 
 gameScene.addBusStop = function(lat, lng, busServices, stopNumber) {
   let busStop = this.add.sprite(lat, lng, 'busStop');
-  busStop.setScale(0.25);
+  busStop.setScale(0.08);
   busStop.depth = 1;
 
   busStop.stopNumber = stopNumber;
@@ -145,13 +145,13 @@ gameScene.generateBuses = function() {
 
 gameScene.addBus = function(busNo, origin, dest) {
   let bus = this.add.sprite(this.busStopList[origin].x, this.busStopList[origin].y, 'bus');
-  bus.setScale(0.5);
+  bus.setScale(0.1);
   bus.depth = 2;
 
   bus.number = busNo;
   bus.origin = origin;
   bus.destination = dest;
-  bus.capacity = 90;
+  bus.capacity = 50;
   bus.state = 'arrived';
   bus.passengers = this.add.group();
   bus.tag = this.add.text(bus.x - 20, bus.y + 50, bus.number, { fontSize: '16px', fill: '#000'});
@@ -213,7 +213,7 @@ gameScene.passengerArrive = function() {
 
 gameScene.addPassenger = function(originStop, destinationStop, busNo) {
   let passenger = this.add.sprite(-100, -100, 'passenger') // render out of screen first
-  passenger.setScale(0.2);
+  passenger.setScale(0.02);
 
   passenger.origin = originStop;
   passenger.destination = destinationStop;
