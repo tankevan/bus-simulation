@@ -31,6 +31,12 @@ gameScene.init = function() {
   this.averageCapacities = {
     "291": { "value": 0, "numRecords": 0 }
   };
+  this.arrivalRates = {
+    "low": 0.42/5,
+    "medium": 0.86/5,
+    "high": 1.71/5,
+  }
+  this.currArrivalRate = this.arrivalRates["low"];
 }
 
 // load asset files for our game
@@ -116,7 +122,14 @@ gameScene.create = function() {
     loop:true
   })
 
-  // this.busEven = this.time.addEvent({});
+  // add event listener to radio buttons
+  // var radios = document.getElementsByTagName("input");
+  // for(var i = 0; i < radios.length; i++) {
+  //   radios[i].onclick = function() {
+  //     this.currArrivalRate = this.arrivalRates[this.value];
+  //     console.log(this.currArrivalRate);
+  //   }
+  // }
 
 };
 
@@ -190,7 +203,14 @@ gameScene.passengerArrive = function() {
     const randNum = Math.random();
     // k. how to use?
     // const invFunc = (-1) / (1.43 * Math.log(1 - randNum));
-    if (randNum < 0.286) {
+    var radios = document.getElementsByTagName("input");
+    for (let i = 0; i < radios.length; i++) {
+      if (radios[i].checked) {
+        this.currArrivalRate = this.arrivalRates[radios[i].value];
+      }
+    }
+
+    if (randNum < this.currArrivalRate) {
       // randomly choose a service
       const servicesList = busStop["busServices"];
       const busIndex = servicesList.length > 0 ? Math.floor(Math.random() * (servicesList.length)) : 0;
