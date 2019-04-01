@@ -25,11 +25,11 @@ gameScene.init = function() {
     "10": { "x": 480, "y": 240, "busServices": [] }
   };
   this.busRoutes = {
-    "358": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "6","5", "4", "3", "2", "1"],
+    "291": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "6","5", "4", "3", "2", "1"],
   };
   this.busStops = {}; // stores bus stop objects
   this.averageCapacities = {
-    "358": { "value": 0, "numRecords": 0 }
+    "291": { "value": 0, "numRecords": 0 }
   };
 }
 
@@ -151,7 +151,7 @@ gameScene.addBus = function(busNo, origin, dest) {
   bus.number = busNo;
   bus.origin = origin;
   bus.destination = dest;
-  bus.capacity = 50;
+  bus.capacity = 20;
   bus.state = 'arrived';
   bus.passengers = this.add.group();
   bus.tag = this.add.text(bus.x - 20, bus.y + 50, bus.number, { fontSize: '16px', fill: '#000'});
@@ -189,8 +189,8 @@ gameScene.passengerArrive = function() {
   this.busStopGroup.children.each((busStop) => {
     const randNum = Math.random();
     // k. how to use?
-    const invFunc = (-1) / (1.43 * Math.log(1 - randNum));
-    if (randNum > 0.1) {
+    // const invFunc = (-1) / (1.43 * Math.log(1 - randNum));
+    if (randNum < 0.286) {
       // randomly choose a service
       const servicesList = busStop["busServices"];
       const busIndex = servicesList.length > 0 ? Math.floor(Math.random() * (servicesList.length)) : 0;
