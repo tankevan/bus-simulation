@@ -1,8 +1,8 @@
 # bus-simulation
 
-Team Members: Daphne Goh, Fong Yu Yang, Kevan Tan
+**Team Members**: Daphne Goh, Fong Yu Yang, Kevan Tan
 
-Project done for Simulation Modeling Analysis Module at SUTD. Objective was to create a framework that can compare different policies for how frequently buses should be dispatched. We focused on varying the time intervals the buses were released at for this project and performed statistical output analysis on the results to make comparisons between simulations. 
+Project was done for Simulation Modeling Analysis Module at SUTD. Objective was to create a framework that can compare different policies for how frequently buses should be dispatched. We focused on varying the time intervals the buses were released at for this project and performed statistical output analysis on the results to make comparisons between simulations. 
 
 ## General Architecture of Simulation
 
@@ -17,7 +17,6 @@ Based on user defined data, and the decided upon structure of each entity (what 
 The relationship between the entities can be seen below. One key observation would be that the bus and bus stops are not directly related to each other. In other words, the bus entity does not contain or belong to the bus stop entity, although the bus entity does use the location of the bus stop to change its state (hence the dotted lines). Another thing to note is that the passenger entity can belong to either the bus or the bus stop. This is because the passenger entity is created (arrives) at the bus stop but when a bus reaches the stop, it is transferred onto the bus entity until the passenger reaches his/her intended destination. 
 
 ![Entity Relation Diagram](entity.png)
-
 
 ## Events Revolve Around Bus Entity
 In our simulation, the bus is the key entity where all the events and other entities revolve around. In order to decide what events to trigger, we assigned three states to the bus object:
