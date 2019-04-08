@@ -116,7 +116,7 @@ gameScene.create = function() {
   // event that spawns buses
 
   this.busEvent = this.time.addEvent({
-    delay: 12500,
+    delay: 5000,
     callback: gameScene.generateBuses,
     callbackScope:this,
     loop:true
