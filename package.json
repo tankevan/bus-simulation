@@ -18,9 +18,9 @@
   },
   "homepage": "https://github.com/tankevan/conservation-game#readme",
   "dependencies": {
-    "heroku": "^0.2.0",
+    "growl": ">=1.10.0",
+    "heroku": "^7.22.9",
     "http-server": "^0.11.1",
-    "minimatch": ">=3.0.2",
-    "growl": ">=1.10.0"
+    "minimatch": ">=3.0.2"
   }
 }
